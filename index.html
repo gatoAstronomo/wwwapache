@@ -3,61 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hola Mundo</title>
+    <title>Tres en Raya - Dos Jugadores</title>
     <style>
-        /* Configuración básica de la página */
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            background: #f4f4f9;
             font-family: Arial, sans-serif;
-            overflow: hidden;
         }
-
-        /* Estilo del contenedor del texto */
-        .container {
+        #game {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            width: 300px;
+            height: 300px;
+        }
+        .cell {
+            background: #fff;
+            border: 2px solid #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .cell:hover {
+            background: #e0f7fa;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.2em;
             text-align: center;
-            color: white;
-            font-size: 3em;
-            font-weight: bold;
-            opacity: 0;
-            animation: fadeIn 2s ease-in forwards;
+            color: #555;
         }
-
-        /* Animación de entrada */
-        @keyframes fadeIn {
-            0% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background: #00796b;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
         }
-
-        /* Efecto de sombra */
-        .container span {
-            display: inline-block;
-            animation: shadowPop 1s infinite alternate;
-        }
-
-        @keyframes shadowPop {
-            0% {
-                text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8);
-            }
-            100% {
-                text-shadow: 0px 0px 20px rgba(255, 255, 255, 1);
-            }
+        button:hover {
+            background: #004d40;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <span>Hola Mundo</span>
-    </div>
+
+<div id="game"></div>
+<div class="message" id="message"></div>
+<button onclick="resetGame()">Reiniciar</button>
+
+<script>
+    const gameBoard = Array(9).fill(null);
+    let currentPlayer = 'X';
+    let gameOver = false;
+
+    const gameElement = document.getElementById('game');
+    const messageElement = document.getElementById('message');
+
+    // Render initial cells
+    gameElement.innerHTML = gameBoard.map((_, i) => `<div class="cell" onclick="handleClick(${i})"></div>`).join('');
+
+    function handleClick(index) {
+        if (gameOver || gameBoard[index]) return;
+
+        gameBoard[index] = currentPlayer;
+        render();
+
+        if (checkWinner(currentPlayer)) {
+            messageElement.innerText = `¡Jugador ${currentPlayer} ha ganado!`;
+            gameOver = true;
+        } else if (gameBoard.every(cell => cell)) {
+            messageElement.innerText = '¡Es un empate!';
+            gameOver = true;
+        } else {
+            // Cambia de jugador
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            messageElement.innerText = `Turno del jugador ${currentPlayer}`;
+        }
+    }
+
+    function checkWinner(player) {
+        const winningCombos = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+        return winningCombos.some(combo => 
+            combo.every(index => gameBoard[index] === player)
+        );
+    }
+
+    function render() {
+        gameElement.childNodes.forEach((cell, i) => {
+            cell.innerText = gameBoard[i];
+            cell.style.color = gameBoard[i] === 'X' ? '#00796b' : '#d32f2f';
+        });
+    }
+
+    function resetGame() {
+        gameBoard.fill(null);
+        currentPlayer = 'X';
+        gameOver = false;
+        messageElement.innerText = `Turno del jugador ${currentPlayer}`;
+        render();
+    }
+
+    // Inicializa el mensaje al cargar el juego
+    messageElement.innerText = `Turno del jugador ${currentPlayer}`;
+</script>
+
 </body>
 </html>
